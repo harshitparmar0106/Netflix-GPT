@@ -1,7 +1,11 @@
-import './App.css';
+import Body from "./components /Body.jsx"
 
 function App() {
-  return <div className="flex bg-red-800 text-red-900">Hello</div>;
+  return (
+   <>
+      <Body/>
+   </>
+  )
 }
 
 export default App;
