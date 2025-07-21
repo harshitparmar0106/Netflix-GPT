@@ -18,10 +18,10 @@ const Login = () => {
         setIsSignInForm(!isSignInForm);
     }
 
-    const handleButtonClick = (e) => {
+    const handleButtonClick = () => {
         //form data validation
-        e.preventDefault()
         const msg = checkValiddata(email.current.value,password.current.value,name.current.value)
+        console.log(msg)
         setErrorMessage(msg);
     }
 
