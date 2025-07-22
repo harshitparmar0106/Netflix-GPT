@@ -49,5 +49,6 @@ export const checkValidSIgnInData = (email, password) => {
 
     if (!isPasswordValid) {
         return "password is not valid";
+        console.log("maje karo")
     }
 };
