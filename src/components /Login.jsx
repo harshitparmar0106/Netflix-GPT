@@ -2,16 +2,27 @@ import { useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidSIgnInData, checkValidSIgnUpData } from "../utils/validate";
 import {
-    getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    updateProfile
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice.js";
+import { BG_BANNER } from "../assets/Constants.jsx";
+import { RxEyeOpen } from "react-icons/rx";
+import { RxEyeClosed } from "react-icons/rx";
+
 
 const Login = () => {
     const [isSignInForm, setIsSignInForm] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+
+    const navigate = useNavigate()
+    const dispatch = useDispatch();
 
     const name = useRef(null);
     const email = useRef(null);
@@ -32,7 +43,7 @@ const Login = () => {
 
         if (!isSignInForm) {
             // Only access confirmPassword ref if it's SignUp
-            const confirmPasswordVal = confirmPassword.current?.value || "";
+            const confirmPasswordVal = confirmPassword.current?.value;
             msg = checkValidSIgnUpData(nameVal, emailVal, passwordVal, confirmPasswordVal);
         } else {
             msg = checkValidSIgnInData(emailVal, passwordVal);
@@ -50,7 +61,38 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed up
                     const user = userCredential.user;
+                    updateProfile(auth.currentUser, {
+                        displayName: nameVal, photoURL: null
+                    }).then(() => {
+                        dispatch(addUser({
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: nameVal
+                        }));
+                        toast.success("User registered successfully!", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: false,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light"
+                        });
+                    }).catch((error) => {
+                        toast.error("Profile update failed: " + error.message, {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: false,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light"
+                        })
+                    });
                     setErrorMessage("User registered successfully!");
+                    navigate("/browse")
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -99,7 +141,17 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed in
                     const user = userCredential.user;
-                    setErrorMessage("Sign-in successfully!");
+                    toast.success("Sign-in successfully!", {
+                        position: "top-center",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light"
+                    });
+                    navigate("/browse")
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -144,7 +196,7 @@ const Login = () => {
             <Header />
             <div className="absolute">
                 <img
-                    src="https://assets.nflxext.com/ffe/siteui/vlv3/a927b1ee-784d-494a-aa80-cf7a062d2523/web/IN-en-20250714-TRIFECTA-perspective_5acb7337-c372-45ec-ae12-ddb110e6ad78_large.jpg"
+                    src={BG_BANNER}
                     alt=""
                 />
             </div>
@@ -161,7 +213,7 @@ const Login = () => {
                         type="text"
                         placeholder="Full Name"
                         ref={name}
-                        className="p-4  m-2 my-4 w-full bg-gray-800"
+                        className="p-4  m-2 my-4 w-full bg-gray-800 rounded-md"
                         required
                     />
                 )}
@@ -169,7 +221,7 @@ const Login = () => {
                     type="text"
                     placeholder="Email Address"
                     ref={email}
-                    className="p-4 mx-2 my-4 w-full bg-gray-800 "
+                    className="p-4 mx-2 my-4 w-full bg-gray-800 rounded-md"
                     required
                 />
                 <div className="relative">
@@ -189,20 +241,9 @@ const Login = () => {
                     >
                         {/* Eye Icon SVG */}
                         {showPassword ? (
-                            < svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" stroke="currentColor" strokeWidth="2"
-                                strokeLinecap="round" strokeLinejoin="round" className="feather feather-eye">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
+                            <RxEyeOpen className="w-6 h-6 text-stone-300" />
                         ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" stroke="currentColor" strokeWidth="2"
-                                strokeLinecap="round" strokeLinejoin="round" className="feather feather-eye-off">
-                                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.89 20.89 0 0 1 5.08-6.11" />
-                                <path d="M1 1l22 22" />
-                                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                                <path d="M14.12 14.12L21 21" />
-                                <path d="M3 3l9 9" />
-                            </svg>
+                            <RxEyeClosed className="w-6 h-6 text-stone-300" />
                         )}
                     </button>
                 </div>
@@ -225,20 +266,9 @@ const Login = () => {
                             >
                                 {/* Eye Icon SVG */}
                                 {showPassword ? (
-                                    < svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" stroke="currentColor" strokeWidth="2"
-                                        strokeLinecap="round" strokeLinejoin="round" className="feather feather-eye">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                        <circle cx="12" cy="12" r="3" />
-                                    </svg>
+                                    <RxEyeOpen className="w-6 h-6 text-stone-300" />
                                 ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" stroke="currentColor" strokeWidth="2"
-                                        strokeLinecap="round" strokeLinejoin="round" className="feather feather-eye-off">
-                                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.89 20.89 0 0 1 5.08-6.11" />
-                                        <path d="M1 1l22 22" />
-                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                                        <path d="M14.12 14.12L21 21" />
-                                        <path d="M3 3l9 9" />
-                                    </svg>
+                                    <RxEyeClosed className="w-6 h-6 text-stone-300" />
                                 )}
                             </button>
                         </div>
