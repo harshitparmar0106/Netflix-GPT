@@ -198,6 +198,7 @@ const Login = () => {
                 <img
                     src={BG_BANNER}
                     alt=""
+                    className="w-screen h-screen object-cover "
                 />
             </div>
             <form
